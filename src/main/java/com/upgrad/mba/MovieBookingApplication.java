@@ -7,6 +7,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class MovieBookingApplication {
@@ -18,6 +20,15 @@ public class MovieBookingApplication {
 		System.out.println("**********************************");
 		Resource resourceDev = new ClassPathResource("application-dev.properties");
 		System.out.println(resourceDev.exists());
+		System.out.println("**********************************");
+
+		System.out.println("**********************************");
+		System.out.println(context.getBeanDefinitionCount());
+		System.out.println(
+				Arrays.stream(context.getBeanDefinitionNames())
+						.collect(Collectors.toList())
+						.contains("myService")
+		);
 		System.out.println("**********************************");
 	}
 
