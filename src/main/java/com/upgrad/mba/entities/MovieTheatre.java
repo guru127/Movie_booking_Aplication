@@ -16,6 +16,8 @@ public class MovieTheatre {
     @JoinColumn(name = "theatre_id", nullable = false)
     private Theatre theatre;
 
+
+
     public int getMovieTheatreId() {
         return movieTheatreId;
     }
