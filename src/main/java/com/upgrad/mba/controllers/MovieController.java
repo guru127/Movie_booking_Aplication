@@ -2,8 +2,11 @@ package com.upgrad.mba.controllers;
 
 import com.upgrad.mba.dto.MovieDTO;
 import com.upgrad.mba.entities.Movie;
+import com.upgrad.mba.exceptions.APIException;
 import com.upgrad.mba.exceptions.MovieDetailsNotFoundException;
+import com.upgrad.mba.exceptions.StatusDetailsNotFoundException;
 import com.upgrad.mba.services.MovieService;
+import com.upgrad.mba.validators.MovieValidator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,9 @@ import java.util.List;
 public class MovieController {
     @Autowired
     MovieService movieService;
+
+    @Autowired
+    MovieValidator movieValidator;
 
     @Autowired
     ModelMapper modelmapper;
@@ -53,7 +59,8 @@ public class MovieController {
     }
 
     @PostMapping(value="/movies", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity newMovie(@RequestBody MovieDTO movieDTO) {
+    public ResponseEntity newMovie(@RequestBody MovieDTO movieDTO) throws APIException, StatusDetailsNotFoundException {
+        movieValidator.validateMovie(movieDTO);
         Movie newMovie = modelmapper.map(movieDTO, Movie.class);
         Movie savedMovie = movieService.acceptMovieDetails(newMovie);
         MovieDTO savedMovieDTO = modelmapper.map(savedMovie,MovieDTO.class);
