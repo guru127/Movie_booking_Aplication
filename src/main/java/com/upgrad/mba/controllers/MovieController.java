@@ -69,8 +69,9 @@ public class MovieController {
     }
 
     @PutMapping(value="/movies/{id}",consumes= MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateMovieDetails(@PathVariable(name = "id") int id, @RequestBody MovieDTO movieDTO) throws MovieDetailsNotFoundException {
+    public ResponseEntity updateMovieDetails(@PathVariable(name = "id") int id, @RequestBody MovieDTO movieDTO) throws MovieDetailsNotFoundException, APIException, StatusDetailsNotFoundException {
         logger.debug("Update movie details : movie id :" + id, movieDTO);
+        movieValidator.validateMovie(movieDTO);
         Movie newMovie = modelmapper.map(movieDTO, Movie.class);
         Movie updatedMovie = movieService.updateMovieDetails(id, newMovie);
         MovieDTO updatedMovieDTO = modelmapper.map(updatedMovie, MovieDTO.class);
