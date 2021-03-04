@@ -1,5 +1,6 @@
 package com.upgrad.mba.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -30,6 +31,7 @@ public class City {
     }
 
     @OneToMany (mappedBy = "city", fetch = FetchType.EAGER)
+    @JsonBackReference
     private Set<Theatre> theatres;
 
     public int getCityId() {

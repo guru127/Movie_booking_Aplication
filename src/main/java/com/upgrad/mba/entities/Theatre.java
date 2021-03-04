@@ -1,5 +1,7 @@
 package com.upgrad.mba.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 
 @Entity
@@ -16,6 +18,7 @@ public class Theatre {
 
     @ManyToOne
     @JoinColumn(name = "city_id", nullable = false)
+    @JsonManagedReference
     private City city;
 
     public int getTheatreId() {
