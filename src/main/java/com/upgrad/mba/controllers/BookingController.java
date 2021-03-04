@@ -2,12 +2,11 @@ package com.upgrad.mba.controllers;
 
 import com.upgrad.mba.dto.BookingDTO;
 import com.upgrad.mba.entities.Booking;
-import com.upgrad.mba.exceptions.BookingDetailsNotFoundException;
-import com.upgrad.mba.exceptions.CustomerDetailsNotFoundException;
-import com.upgrad.mba.exceptions.MovieTheatreDetailsNotFoundException;
+import com.upgrad.mba.exceptions.*;
 import com.upgrad.mba.services.BookingService;
 import com.upgrad.mba.utils.DTOEntityConverter;
 import com.upgrad.mba.utils.EntityDTOConverter;
+import com.upgrad.mba.validators.BookingValidator;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +21,9 @@ import java.util.List;
 public class BookingController {
     @Autowired
     BookingService bookingService;
+
+    @Autowired
+    BookingValidator bookingValidator;
 
     @Autowired
     ModelMapper modelmapper;
@@ -46,7 +48,8 @@ public class BookingController {
     }
 
     @PostMapping(value="/bookings",consumes= MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity newBooking(@RequestBody BookingDTO bookingDTO) throws CustomerDetailsNotFoundException, MovieTheatreDetailsNotFoundException {
+    public ResponseEntity newBooking(@RequestBody BookingDTO bookingDTO) throws CustomerDetailsNotFoundException, MovieTheatreDetailsNotFoundException, APIException, BookingFailedException {
+        bookingValidator.validateBooking(bookingDTO);
         Booking newBooking = dtoEntityConverter.convertToBookingEntity(bookingDTO);
         Booking savedBooking = bookingService.acceptBookingDetails(newBooking);
         BookingDTO savedBookingDTO = entityDTOConverter.convertToBookingDTO(savedBooking);
