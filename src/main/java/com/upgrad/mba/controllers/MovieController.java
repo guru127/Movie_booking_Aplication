@@ -2,9 +2,8 @@ package com.upgrad.mba.controllers;
 
 import com.upgrad.mba.dto.MovieDTO;
 import com.upgrad.mba.entities.Movie;
-import com.upgrad.mba.exceptions.APIException;
-import com.upgrad.mba.exceptions.MovieDetailsNotFoundException;
-import com.upgrad.mba.exceptions.StatusDetailsNotFoundException;
+import com.upgrad.mba.exceptions.*;
+import com.upgrad.mba.services.CustomerService;
 import com.upgrad.mba.services.MovieService;
 import com.upgrad.mba.validators.MovieValidator;
 import org.modelmapper.ModelMapper;
@@ -24,6 +23,9 @@ import java.util.List;
 public class MovieController {
     @Autowired
     MovieService movieService;
+
+    @Autowired
+    CustomerService customerService;
 
     @Autowired
     MovieValidator movieValidator;
@@ -58,14 +60,20 @@ public class MovieController {
         return new ResponseEntity<>(movieDTOList, HttpStatus.OK);
     }
 
-    @PostMapping(value="/movies", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity newMovie(@RequestBody MovieDTO movieDTO) throws APIException, StatusDetailsNotFoundException {
+    @PostMapping(value="/movies", consumes = MediaType.APPLICATION_JSON_VALUE,headers="Accept=application/json")
+    public ResponseEntity newMovie(@RequestBody MovieDTO movieDTO, @RequestHeader (value = "ACCESS-TOKEN") String token) throws APIException, StatusDetailsNotFoundException, CustomerDetailsNotFoundException, BadCredentialsException {
+        ResponseEntity responseEntity = null;
+        if(token == null)
+            throw new APIException("Please add proper authentication");
+        if(!customerService.getCustomerDetailsByUsername(token).getUserType().getUserTypeName().equalsIgnoreCase("Admin"))
+            throw new BadCredentialsException("This feature is only available to admin");
         movieValidator.validateMovie(movieDTO);
         Movie newMovie = modelmapper.map(movieDTO, Movie.class);
         Movie savedMovie = movieService.acceptMovieDetails(newMovie);
         MovieDTO savedMovieDTO = modelmapper.map(savedMovie,MovieDTO.class);
-        logger.debug("Accepted new movie details",savedMovieDTO);
-        return new ResponseEntity<>(savedMovieDTO,HttpStatus.CREATED);
+        responseEntity = new ResponseEntity<>(savedMovieDTO,HttpStatus.CREATED);
+        logger.debug("Accept new movie details",responseEntity);
+        return responseEntity;
     }
 
     @PutMapping(value="/movies/{id}",consumes= MediaType.APPLICATION_JSON_VALUE)

@@ -41,8 +41,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity login(@RequestBody LoginDTO loginDTO)
-            throws APIException, CustomerDetailsNotFoundException, BadCredentialsException {
+    public ResponseEntity login(@RequestBody LoginDTO loginDTO) throws APIException, CustomerDetailsNotFoundException, BadCredentialsException {
         customerValidator.validateUserLogin(loginDTO);
         Map<String, String> model = new HashMap<>();
         Customer savedCustomer = customerService.getCustomerDetailsByUsername(loginDTO.getUsername());
