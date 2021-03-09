@@ -77,8 +77,12 @@ public class MovieController {
     }
 
     @PutMapping(value="/movies/{id}",consumes= MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateMovieDetails(@PathVariable(name = "id") int id, @RequestBody MovieDTO movieDTO) throws MovieDetailsNotFoundException, APIException, StatusDetailsNotFoundException {
+    public ResponseEntity updateMovieDetails(@PathVariable(name = "id") int id, @RequestBody MovieDTO movieDTO, @RequestHeader (value = "ACCESS-TOKEN") String token) throws MovieDetailsNotFoundException, APIException, StatusDetailsNotFoundException, CustomerDetailsNotFoundException, BadCredentialsException {
         logger.debug("Update movie details : movie id :" + id, movieDTO);
+        if(token == null)
+            throw new APIException("Please add proper authentication");
+        if(!customerService.getCustomerDetailsByUsername(token).getUserType().getUserTypeName().equalsIgnoreCase("Admin"))
+            throw new BadCredentialsException("This feature is only available to admin");
         movieValidator.validateMovie(movieDTO);
         Movie newMovie = modelmapper.map(movieDTO, Movie.class);
         Movie updatedMovie = movieService.updateMovieDetails(id, newMovie);
