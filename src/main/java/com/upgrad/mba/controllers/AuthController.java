@@ -1,10 +1,9 @@
 package com.upgrad.mba.controllers;
 
 import com.upgrad.mba.dto.CustomerDTO;
+import com.upgrad.mba.dto.LoginDTO;
 import com.upgrad.mba.entities.Customer;
-import com.upgrad.mba.exceptions.APIException;
-import com.upgrad.mba.exceptions.CustomerUserNameExistsException;
-import com.upgrad.mba.exceptions.UserTypeDetailsNotFoundException;
+import com.upgrad.mba.exceptions.*;
 import com.upgrad.mba.services.CustomerServiceImpl;
 import com.upgrad.mba.validators.CustomerValidator;
 import org.modelmapper.ModelMapper;
@@ -16,6 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value="/movie_app/v1")
@@ -36,5 +38,19 @@ public class AuthController {
         Customer savedCustomer = customerService.acceptCustomerDetails(newCustomer);
         CustomerDTO savedCustomerDTO = modelMapper.map(savedCustomer,CustomerDTO.class);
         return new ResponseEntity<>(savedCustomerDTO, HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/login")
+    public ResponseEntity login(@RequestBody LoginDTO loginDTO)
+            throws APIException, CustomerDetailsNotFoundException, BadCredentialsException {
+        customerValidator.validateUserLogin(loginDTO);
+        Map<String, String> model = new HashMap<>();
+        Customer savedCustomer = customerService.getCustomerDetailsByUsername(loginDTO.getUsername());
+        if (!savedCustomer.getPassword().equals(loginDTO.getPassword())) {
+            throw new BadCredentialsException("Invalid username/password");
+        }
+        model.put("message","Logged in Successfully");
+        model.put("token",savedCustomer.getUsername());
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 }
